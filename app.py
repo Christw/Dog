@@ -157,13 +157,44 @@ def get_breed_information(
 
     search_name = search_name.lower()
 
+    # --------------------------------------------------------
+    # Look for manually curated information
+    # --------------------------------------------------------
+
     for dog in breed_information:
 
         if dog["breed"].lower() == search_name:
 
             return dog
 
-    return None
+    # --------------------------------------------------------
+    # Create fallback information
+    # --------------------------------------------------------
+
+    display_name = (
+        f"{sub_breed.title()} {breed.title()}"
+        if sub_breed
+        else breed.title()
+    )
+
+    return {
+        "breed": search_name,
+        "name": display_name,
+        "origin": "Information not available",
+        "size": "Information not available",
+        "height": "Information not available",
+        "weight": "Information not available",
+        "life_span": "Information not available",
+        "temperament": "Information not available",
+        "energy": "Information not available",
+        "grooming": "Information not available",
+        "description": (
+            f"{display_name} is a dog breed or breed variety "
+            f"available in the Dog Encyclopedia. "
+            f"More detailed information about this breed "
+            f"will be added soon."
+        )
+    }
 
 
 # ============================================================
@@ -551,12 +582,41 @@ search = st.text_input(
     placeholder="Try Golden Retriever..."
 )
 
+# ============================================================
+# BREED GROUP FILTER
+# ============================================================
+
+breed_groups = sorted(
+    list(
+        set(
+            dog["breed"]
+            for dog in all_breeds
+        )
+    )
+)
+
+group_options = [
+    "All breeds"
+] + breed_groups
+
+selected_group = st.selectbox(
+    "🐕 Breed category",
+    group_options
+)
+
+if selected_group != "All breeds":
+
+    filtered_breeds = [
+        dog
+        for dog in filtered_breeds
+        if dog["breed"] == selected_group
+    ]
 
 # ============================================================
 # FILTER
 # ============================================================
 
-filtered_breeds = all_breeds
+filtered_breeds = all_breeds.copy()
 
 
 if search:
@@ -700,3 +760,27 @@ for index, dog in enumerate(
             st.session_state.selected_breed = dog
 
             st.rerun()
+        sort_option = st.selectbox(
+    "↕️ Sort breeds",
+    [
+        "A → Z",
+        "Z → A"
+    ]
+)
+        if sort_option == "A → Z":
+
+    filtered_breeds = sorted(
+        filtered_breeds,
+        key=lambda x: x["display_name"].lower()
+    )
+
+        else:
+
+    filtered_breeds = sorted(
+        filtered_breeds,
+        key=lambda x: x["display_name"].lower(),
+        reverse=True
+    )
+
+
+
