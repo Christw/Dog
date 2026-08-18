@@ -221,8 +221,16 @@ st.markdown(
        CARDS
        ======================================================== */
 
+    /* Make ALL dog images identical in display size */
+    [data-testid="stImage"] {
+        width: 100%;
+    }
+    
     [data-testid="stImage"] img {
-        border-radius: 18px;
+        width: 100% !important;
+        height: 260px !important;
+        object-fit: cover !important;
+        border-radius: 18px !important;
     }
 
     .dog-card-title {
