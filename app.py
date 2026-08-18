@@ -22,7 +22,7 @@ BREEDS_URL = "https://dog.ceo/api/breeds/list/all"
 
 
 # ============================================================
-# LOAD BREEDS FROM DOG CEO API
+# LOAD DOG CEO BREEDS
 # ============================================================
 
 @st.cache_data(ttl=3600)
@@ -39,16 +39,30 @@ def get_breeds():
 
 
 # ============================================================
-# GET IMAGES FOR A BREED
+# GET IMAGES
 # ============================================================
 
 @st.cache_data(ttl=3600)
-def get_breed_images(breed, amount=8):
+def get_breed_images(
+    breed,
+    sub_breed=None,
+    amount=8
+):
 
-    url = (
-        f"https://dog.ceo/api/"
-        f"breed/{breed}/images"
-    )
+    if sub_breed:
+
+        url = (
+            f"https://dog.ceo/api/"
+            f"breed/{breed}/"
+            f"{sub_breed}/images"
+        )
+
+    else:
+
+        url = (
+            f"https://dog.ceo/api/"
+            f"breed/{breed}/images"
+        )
 
     response = requests.get(
         url,
@@ -79,16 +93,73 @@ def load_breed_information():
 
 
 # ============================================================
-# FIND BREED INFORMATION
+# CREATE BREED LIST
 # ============================================================
 
-def get_breed_information(breed):
+def create_breed_list(breeds):
 
-    breed = breed.lower()
+    result = []
+
+    for breed, sub_breeds in breeds.items():
+
+        # ----------------------------------------------------
+        # NORMAL BREED
+        # ----------------------------------------------------
+
+        if not sub_breeds:
+
+            result.append(
+                {
+                    "id": breed,
+                    "breed": breed,
+                    "sub_breed": None,
+                    "display_name": breed.title()
+                }
+            )
+
+        # ----------------------------------------------------
+        # BREED WITH SUB-BREEDS
+        # ----------------------------------------------------
+
+        else:
+
+            for sub_breed in sub_breeds:
+
+                result.append(
+                    {
+                        "id": f"{breed}_{sub_breed}",
+                        "breed": breed,
+                        "sub_breed": sub_breed,
+                        "display_name": (
+                            f"{sub_breed.title()} "
+                            f"{breed.title()}"
+                        )
+                    }
+                )
+
+    return result
+
+
+# ============================================================
+# FIND INFORMATION
+# ============================================================
+
+def get_breed_information(
+    breed,
+    sub_breed=None
+):
+
+    search_name = (
+        f"{sub_breed} {breed}"
+        if sub_breed
+        else breed
+    )
+
+    search_name = search_name.lower()
 
     for dog in breed_information:
 
-        if dog["breed"].lower() == breed:
+        if dog["breed"].lower() == search_name:
 
             return dog
 
@@ -130,6 +201,15 @@ except Exception as error:
 
 
 # ============================================================
+# CREATE BREED LIST
+# ============================================================
+
+all_breeds = create_breed_list(
+    breeds
+)
+
+
+# ============================================================
 # SESSION STATE
 # ============================================================
 
@@ -142,17 +222,28 @@ if "selected_breed" not in st.session_state:
 # BREED DETAIL PAGE
 # ============================================================
 
-if st.session_state.selected_breed is not None:
+if st.session_state.selected_breed:
 
-    breed = st.session_state.selected_breed
+    selected = (
+        st.session_state.selected_breed
+    )
+
+    breed = selected["breed"]
+
+    sub_breed = selected["sub_breed"]
+
+    display_name = selected[
+        "display_name"
+    ]
 
     info = get_breed_information(
-        breed
+        breed,
+        sub_breed
     )
 
 
     # ========================================================
-    # BACK BUTTON
+    # BACK
     # ========================================================
 
     if st.button(
@@ -165,17 +256,8 @@ if st.session_state.selected_breed is not None:
 
 
     # ========================================================
-    # BREED TITLE
+    # TITLE
     # ========================================================
-
-    if info:
-
-        display_name = info["name"]
-
-    else:
-
-        display_name = breed.title()
-
 
     st.title(
         f"🐶 {display_name}"
@@ -183,14 +265,15 @@ if st.session_state.selected_breed is not None:
 
 
     # ========================================================
-    # MAIN PHOTO
+    # GET IMAGES
     # ========================================================
 
     try:
 
         images = get_breed_images(
             breed,
-            amount=8
+            sub_breed,
+            amount=9
         )
 
     except Exception as error:
@@ -204,6 +287,10 @@ if st.session_state.selected_breed is not None:
         st.stop()
 
 
+    # ========================================================
+    # MAIN PHOTO
+    # ========================================================
+
     if images:
 
         st.image(
@@ -213,7 +300,7 @@ if st.session_state.selected_breed is not None:
 
 
     # ========================================================
-    # BASIC INFORMATION
+    # BREED OVERVIEW
     # ========================================================
 
     if info:
@@ -226,12 +313,14 @@ if st.session_state.selected_breed is not None:
 
         col1, col2, col3, col4 = st.columns(4)
 
+
         with col1:
 
             st.metric(
                 "📏 Size",
                 info["size"]
             )
+
 
         with col2:
 
@@ -240,12 +329,14 @@ if st.session_state.selected_breed is not None:
                 info["life_span"]
             )
 
+
         with col3:
 
             st.metric(
                 "⚡ Energy",
                 info["energy"]
             )
+
 
         with col4:
 
@@ -320,7 +411,7 @@ if st.session_state.selected_breed is not None:
             )
 
             st.write(
-                f"**⚡ Energy level**  \n"
+                f"**⚡ Energy**  \n"
                 f"{info['energy']}"
             )
 
@@ -342,12 +433,10 @@ if st.session_state.selected_breed is not None:
 
     if len(images) > 1:
 
-        gallery_images = images[1:]
-
         columns = st.columns(4)
 
         for index, image in enumerate(
-            gallery_images
+            images[1:]
         ):
 
             with columns[index % 4]:
@@ -359,7 +448,7 @@ if st.session_state.selected_breed is not None:
 
 
     # ========================================================
-    # YOUTUBE VIDEOS
+    # VIDEOS
     # ========================================================
 
     st.divider()
@@ -368,10 +457,17 @@ if st.session_state.selected_breed is not None:
         "🎥 Videos"
     )
 
+    youtube_search = (
+        display_name.replace(
+            " ",
+            "+"
+        )
+        + "+dog+breed"
+    )
+
     youtube_url = (
         "https://www.youtube.com/results?search_query="
-        + display_name.replace(" ", "+")
-        + "+dog+breed"
+        + youtube_search
     )
 
     st.link_button(
@@ -381,7 +477,7 @@ if st.session_state.selected_breed is not None:
 
 
     # ========================================================
-    # BACK BUTTON
+    # BACK
     # ========================================================
 
     st.divider()
@@ -396,7 +492,6 @@ if st.session_state.selected_breed is not None:
         st.rerun()
 
 
-    # Stop here so the homepage doesn't appear below
     st.stop()
 
 
@@ -424,15 +519,15 @@ col1, col2, col3 = st.columns(3)
 with col1:
 
     st.metric(
-        "🐕 Dog Breeds",
-        len(breeds)
+        "🐕 Breed varieties",
+        len(all_breeds)
     )
 
 
 with col2:
 
     st.metric(
-        "📖 Detailed Breeds",
+        "📖 Detailed breeds",
         len(breed_information)
     )
 
@@ -440,7 +535,7 @@ with col2:
 with col3:
 
     st.metric(
-        "📸 Photo API",
+        "📸 Image source",
         "Dog CEO"
     )
 
@@ -453,24 +548,24 @@ st.divider()
 
 search = st.text_input(
     "🔎 Search for a dog breed",
-    placeholder="Try Labrador, Poodle, Husky..."
+    placeholder="Try Golden Retriever..."
 )
 
 
 # ============================================================
-# FILTER BREEDS
+# FILTER
 # ============================================================
 
-filtered_breeds = breeds
+filtered_breeds = all_breeds
 
 
 if search:
 
     filtered_breeds = [
-        breed
-        for breed in breeds
+        dog
+        for dog in all_breeds
         if search.lower()
-        in breed.lower()
+        in dog["display_name"].lower()
     ]
 
 
@@ -490,32 +585,31 @@ st.write(
 columns = st.columns(4)
 
 
-for index, breed in enumerate(
+for index, dog in enumerate(
     filtered_breeds
 ):
 
     with columns[index % 4]:
 
+        breed = dog["breed"]
+
+        sub_breed = dog[
+            "sub_breed"
+        ]
+
+        display_name = dog[
+            "display_name"
+        ]
+
+
         # ----------------------------------------------------
-        # GET BREED INFORMATION
+        # INFORMATION
         # ----------------------------------------------------
 
         info = get_breed_information(
-            breed
+            breed,
+            sub_breed
         )
-
-
-        # ----------------------------------------------------
-        # DISPLAY NAME
-        # ----------------------------------------------------
-
-        if info:
-
-            display_name = info["name"]
-
-        else:
-
-            display_name = breed.title()
 
 
         # ----------------------------------------------------
@@ -526,6 +620,7 @@ for index, breed in enumerate(
 
             images = get_breed_images(
                 breed,
+                sub_breed,
                 amount=1
             )
 
@@ -553,7 +648,7 @@ for index, breed in enumerate(
 
 
         # ----------------------------------------------------
-        # SHORT DESCRIPTION
+        # DESCRIPTION
         # ----------------------------------------------------
 
         if info:
@@ -573,6 +668,12 @@ for index, breed in enumerate(
                 description
             )
 
+        else:
+
+            st.caption(
+                "Breed information coming soon."
+            )
+
 
         # ----------------------------------------------------
         # LIFE SPAN
@@ -581,21 +682,21 @@ for index, breed in enumerate(
         if info:
 
             st.caption(
-                f"⏳ {info['life_span']}  "
+                f"⏳ {info['life_span']} "
                 f"• ⚡ {info['energy']}"
             )
 
 
         # ----------------------------------------------------
-        # VIEW BUTTON
+        # BUTTON
         # ----------------------------------------------------
 
         if st.button(
             "View breed →",
-            key=f"view_{breed}",
+            key=f"view_{dog['id']}",
             use_container_width=True
         ):
 
-            st.session_state.selected_breed = breed
+            st.session_state.selected_breed = dog
 
             st.rerun()
