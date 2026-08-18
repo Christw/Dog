@@ -17,15 +17,7 @@ st.set_page_config(
 
 
 # ============================================================
-# SIMPLE CUSTOM CSS
-# ============================================================
-#
-# Important:
-# We deliberately avoid Streamlit's internal data-testid
-# selectors. They can change between Streamlit versions.
-#
-# This CSS only targets stable elements/classes that we
-# control ourselves.
+# CUSTOM CSS
 # ============================================================
 
 st.markdown(
@@ -41,36 +33,17 @@ st.markdown(
     }
 
     .block-container {
-        max-width: 1500px;
+        max-width: 1450px;
         padding-top: 1.5rem;
         padding-bottom: 4rem;
     }
 
-    /* Hide Streamlit menu/footer */
     #MainMenu {
         visibility: hidden;
     }
 
     footer {
         visibility: hidden;
-    }
-
-
-    /* ========================================================
-       TYPOGRAPHY
-       ======================================================== */
-
-    html,
-    body,
-    [class*="css"] {
-        font-family:
-            -apple-system,
-            BlinkMacSystemFont,
-            "Segoe UI",
-            Roboto,
-            Helvetica,
-            Arial,
-            sans-serif;
     }
 
 
@@ -82,7 +55,7 @@ st.markdown(
         padding: 45px 0 35px 0;
     }
 
-    .hero h1 {
+    .hero-title {
         font-size: 52px;
         line-height: 1.05;
         letter-spacing: -2px;
@@ -91,7 +64,7 @@ st.markdown(
         margin: 0;
     }
 
-    .hero p {
+    .hero-subtitle {
         font-size: 19px;
         line-height: 1.5;
         color: #717171;
@@ -101,34 +74,7 @@ st.markdown(
 
 
     /* ========================================================
-       SEARCH AREA
-       ======================================================== */
-
-    .search-box {
-        border: 1px solid #dddddd;
-        border-radius: 18px;
-        padding: 7px 10px;
-        background: #ffffff;
-        box-shadow:
-            0 3px 12px rgba(0, 0, 0, 0.08);
-        margin-bottom: 25px;
-    }
-
-
-    /* ========================================================
-       FILTER PILLS
-       ======================================================== */
-
-    .filter-label {
-        color: #717171;
-        font-size: 13px;
-        font-weight: 600;
-        margin-bottom: 4px;
-    }
-
-
-    /* ========================================================
-       SECTION
+       SECTION TITLES
        ======================================================== */
 
     .section-heading {
@@ -136,20 +82,20 @@ st.markdown(
         font-weight: 700;
         color: #222222;
         letter-spacing: -0.5px;
-        margin-top: 25px;
-        margin-bottom: 20px;
+        margin-top: 30px;
+        margin-bottom: 18px;
     }
 
 
     /* ========================================================
-       BREED CARD
+       DOG CARD
        ======================================================== */
 
     .dog-image {
-        border-radius: 16px;
         width: 100%;
         aspect-ratio: 1 / 1;
         object-fit: cover;
+        border-radius: 16px;
         display: block;
     }
 
@@ -157,7 +103,7 @@ st.markdown(
         font-size: 16px;
         font-weight: 650;
         color: #222222;
-        margin-top: 11px;
+        margin-top: 10px;
         line-height: 1.3;
     }
 
@@ -173,6 +119,7 @@ st.markdown(
         font-size: 13px;
         color: #717171;
         margin-top: 7px;
+        margin-bottom: 8px;
     }
 
 
@@ -181,12 +128,12 @@ st.markdown(
        ======================================================== */
 
     .detail-title {
-        font-size: 42px;
+        font-size: 44px;
         font-weight: 750;
         letter-spacing: -1.5px;
         color: #222222;
         margin-top: 20px;
-        margin-bottom: 6px;
+        margin-bottom: 5px;
     }
 
     .detail-subtitle {
@@ -207,7 +154,7 @@ st.markdown(
        ======================================================== */
 
     .fact {
-        padding: 18px 0;
+        padding: 16px 0;
         border-bottom: 1px solid #eeeeee;
     }
 
@@ -225,24 +172,21 @@ st.markdown(
 
 
     /* ========================================================
-       GALLERY
+       BUTTONS
        ======================================================== */
 
-    .gallery-image {
-        border-radius: 14px;
-        width: 100%;
-        aspect-ratio: 1 / 1;
-        object-fit: cover;
+    .stButton > button {
+        border-radius: 12px;
+        border: 1px solid #dddddd;
+        background: white;
+        color: #222222;
+        font-weight: 600;
+        transition: all 0.2s ease;
     }
 
-
-    /* ========================================================
-       SMALL TEXT
-       ======================================================== */
-
-    .muted {
-        color: #717171;
-        font-size: 14px;
+    .stButton > button:hover {
+        border-color: #222222;
+        background: #f7f7f7;
     }
 
 
@@ -252,17 +196,17 @@ st.markdown(
 
     @media (max-width: 768px) {
 
-        .hero h1 {
-            font-size: 36px;
+        .hero-title {
+            font-size: 38px;
             letter-spacing: -1px;
         }
 
-        .hero p {
+        .hero-subtitle {
             font-size: 17px;
         }
 
         .detail-title {
-            font-size: 32px;
+            font-size: 34px;
         }
 
     }
@@ -277,9 +221,7 @@ st.markdown(
 # API
 # ============================================================
 
-BREEDS_URL = (
-    "https://dog.ceo/api/breeds/list/all"
-)
+BREEDS_URL = "https://dog.ceo/api/breeds/list/all"
 
 
 # ============================================================
@@ -332,11 +274,13 @@ def get_breed_images(
 
     response.raise_for_status()
 
-    return response.json()["message"][:amount]
+    images = response.json()["message"]
+
+    return images[:amount]
 
 
 # ============================================================
-# LOAD LOCAL BREED DATA
+# LOAD LOCAL BREED INFORMATION
 # ============================================================
 
 @st.cache_data
@@ -361,6 +305,10 @@ def create_breed_list(breeds):
 
     for breed, sub_breeds in breeds.items():
 
+        # ----------------------------------------------------
+        # NORMAL BREED
+        # ----------------------------------------------------
+
         if not sub_breeds:
 
             result.append(
@@ -371,6 +319,10 @@ def create_breed_list(breeds):
                     "display_name": breed.title()
                 }
             )
+
+        # ----------------------------------------------------
+        # SUB BREEDS
+        # ----------------------------------------------------
 
         else:
 
@@ -392,7 +344,7 @@ def create_breed_list(breeds):
 
 
 # ============================================================
-# GET BREED INFORMATION
+# FIND BREED INFORMATION
 # ============================================================
 
 def get_breed_information(
@@ -411,6 +363,11 @@ def get_breed_information(
         search_name = breed
 
     search_name = search_name.lower()
+
+
+    # --------------------------------------------------------
+    # SEARCH JSON
+    # --------------------------------------------------------
 
     for dog in breed_information:
 
@@ -478,6 +435,10 @@ except Exception as error:
     st.stop()
 
 
+# ============================================================
+# CREATE BREED DATABASE
+# ============================================================
+
 all_breeds = create_breed_list(
     breeds
 )
@@ -493,7 +454,9 @@ if "selected_breed" not in st.session_state:
 
 
 # ============================================================
+# ============================================================
 # DETAIL PAGE
+# ============================================================
 # ============================================================
 
 if st.session_state.selected_breed:
@@ -517,7 +480,7 @@ if st.session_state.selected_breed:
 
 
     # ========================================================
-    # BACK
+    # BACK BUTTON
     # ========================================================
 
     if st.button(
@@ -530,7 +493,7 @@ if st.session_state.selected_breed:
 
 
     # ========================================================
-    # HEADER
+    # TITLE
     # ========================================================
 
     st.markdown(
@@ -540,7 +503,7 @@ if st.session_state.selected_breed:
         </div>
 
         <div class="detail-subtitle">
-            Dog breed encyclopedia
+            Dog Encyclopedia
         </div>
         """,
         unsafe_allow_html=True
@@ -548,7 +511,7 @@ if st.session_state.selected_breed:
 
 
     # ========================================================
-    # LOAD PHOTOS
+    # LOAD IMAGES
     # ========================================================
 
     try:
@@ -565,7 +528,7 @@ if st.session_state.selected_breed:
 
 
     # ========================================================
-    # MAIN PHOTO
+    # MAIN IMAGE
     # ========================================================
 
     if images:
@@ -575,9 +538,15 @@ if st.session_state.selected_breed:
             use_container_width=True
         )
 
+    else:
+
+        st.info(
+            "No photos available."
+        )
+
 
     # ========================================================
-    # ABOUT
+    # ABOUT + FACTS
     # ========================================================
 
     left, right = st.columns(
@@ -586,27 +555,45 @@ if st.session_state.selected_breed:
     )
 
 
+    # ========================================================
+    # ABOUT
+    # ========================================================
+
     with left:
 
         st.markdown(
-            '<div class="section-heading">About this breed</div>',
+            """
+            <div class="section-heading">
+                About this breed
+            </div>
+            """,
             unsafe_allow_html=True
         )
 
         st.markdown(
             f"""
             <div class="detail-description">
-                {html.escape(info["description"])}
+                {html.escape(
+                    str(info["description"])
+                )}
             </div>
             """,
             unsafe_allow_html=True
         )
 
 
+    # ========================================================
+    # FACTS
+    # ========================================================
+
     with right:
 
         st.markdown(
-            '<div class="section-heading">Quick facts</div>',
+            """
+            <div class="section-heading">
+                Quick facts
+            </div>
+            """,
             unsafe_allow_html=True
         )
 
@@ -650,7 +637,7 @@ if st.session_state.selected_breed:
                 <div class="fact">
 
                     <div class="fact-label">
-                        {html.escape(label)}
+                        {html.escape(str(label))}
                     </div>
 
                     <div class="fact-value">
@@ -670,19 +657,23 @@ if st.session_state.selected_breed:
     if len(images) > 1:
 
         st.markdown(
-            '<div class="section-heading">More photos</div>',
+            """
+            <div class="section-heading">
+                More photos
+            </div>
+            """,
             unsafe_allow_html=True
         )
 
 
-        gallery_images = images[1:]
+        gallery = images[1:]
 
 
         columns = st.columns(4)
 
 
         for index, image in enumerate(
-            gallery_images
+            gallery
         ):
 
             with columns[index % 4]:
@@ -698,7 +689,11 @@ if st.session_state.selected_breed:
     # ========================================================
 
     st.markdown(
-        '<div class="section-heading">Watch videos</div>',
+        """
+        <div class="section-heading">
+            Watch videos
+        </div>
+        """,
         unsafe_allow_html=True
     )
 
@@ -727,22 +722,29 @@ if st.session_state.selected_breed:
 
 
 # ============================================================
+# ============================================================
 # HOME PAGE
+# ============================================================
+# ============================================================
+
+
+# ============================================================
+# HERO
 # ============================================================
 
 st.markdown(
     """
     <div class="hero">
 
-        <h1>
+        <div class="hero-title">
             Find your perfect dog.
-        </h1>
+        </div>
 
-        <p>
+        <div class="hero-subtitle">
             Explore dog breeds from around the world,
             discover their personalities, and browse
             beautiful photos.
-        </p>
+        </div>
 
     </div>
     """,
@@ -751,29 +753,27 @@ st.markdown(
 
 
 # ============================================================
-# SEARCH
+# SEARCH + SORT
 # ============================================================
 
-search_col, sort_col = st.columns(
+search_column, sort_column = st.columns(
     [3, 1]
 )
 
 
-with search_col:
+with search_column:
 
     search = st.text_input(
-        "Search",
-        placeholder=(
-            "🔎  Search breeds..."
-        ),
+        "Search breeds",
+        placeholder="🔎  Search for a breed...",
         label_visibility="collapsed"
     )
 
 
-with sort_col:
+with sort_column:
 
     sort_option = st.selectbox(
-        "Sort",
+        "Sort breeds",
         [
             "A → Z",
             "Z → A"
@@ -809,12 +809,18 @@ if not search:
 
     ]
 
+
     if popular:
 
         st.markdown(
-            '<div class="section-heading">Popular breeds</div>',
+            """
+            <div class="section-heading">
+                Popular breeds
+            </div>
+            """,
             unsafe_allow_html=True
         )
+
 
         popular_columns = st.columns(
             len(popular)
@@ -827,6 +833,10 @@ if not search:
         ):
 
             with column:
+
+                # --------------------------------------------
+                # IMAGE
+                # --------------------------------------------
 
                 try:
 
@@ -849,15 +859,25 @@ if not search:
                     )
 
 
+                # --------------------------------------------
+                # NAME
+                # --------------------------------------------
+
                 st.markdown(
                     f"""
                     <div class="dog-card-title">
-                        {html.escape(dog["display_name"])}
+                        {html.escape(
+                            dog["display_name"]
+                        )}
                     </div>
                     """,
                     unsafe_allow_html=True
                 )
 
+
+                # --------------------------------------------
+                # BUTTON
+                # --------------------------------------------
 
                 if st.button(
                     "Explore",
@@ -871,7 +891,7 @@ if not search:
 
 
 # ============================================================
-# FILTER
+# FILTER BREEDS
 # ============================================================
 
 filtered_breeds = all_breeds.copy()
@@ -906,30 +926,44 @@ filtered_breeds = sorted(
 
 
 # ============================================================
-# RESULTS
+# RESULTS HEADER
 # ============================================================
 
 if search:
 
     st.markdown(
-        f"""
+        """
         <div class="section-heading">
             Search results
-        </div>
-
-        <div class="muted">
-            {len(filtered_breeds)}
-            breed(s) found
         </div>
         """,
         unsafe_allow_html=True
     )
 
+    st.caption(
+        f"{len(filtered_breeds)} breed(s) found"
+    )
+
 else:
 
     st.markdown(
-        '<div class="section-heading">Explore all breeds</div>',
+        """
+        <div class="section-heading">
+            Explore all breeds
+        </div>
+        """,
         unsafe_allow_html=True
+    )
+
+
+# ============================================================
+# NO RESULTS
+# ============================================================
+
+if not filtered_breeds:
+
+    st.info(
+        "No breeds found. Try another search."
     )
 
 
@@ -954,6 +988,10 @@ for index, dog in enumerate(
             "display_name"
         ]
 
+
+        # ----------------------------------------------------
+        # BREED INFORMATION
+        # ----------------------------------------------------
 
         info = get_breed_information(
             breed,
@@ -985,6 +1023,28 @@ for index, dog in enumerate(
                 use_container_width=True
             )
 
+        else:
+
+            st.markdown(
+                """
+                <div
+                    style="
+                        width:100%;
+                        aspect-ratio:1/1;
+                        background:#f5f5f5;
+                        border-radius:16px;
+                        display:flex;
+                        align-items:center;
+                        justify-content:center;
+                        font-size:40px;
+                    "
+                >
+                    🐶
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
 
         # ----------------------------------------------------
         # TITLE
@@ -1004,15 +1064,15 @@ for index, dog in enumerate(
         # DESCRIPTION
         # ----------------------------------------------------
 
-        description = (
+        description = str(
             info["description"]
         )
 
 
-        if len(description) > 100:
+        if len(description) > 105:
 
             description = (
-                description[:100]
+                description[:105]
                 + "..."
             )
 
@@ -1028,13 +1088,15 @@ for index, dog in enumerate(
 
 
         # ----------------------------------------------------
-        # META
+        # LIFE SPAN
         # ----------------------------------------------------
 
         st.markdown(
             f"""
             <div class="dog-card-meta">
-                ⏳ {html.escape(str(info["life_span"]))}
+                ⏳ {html.escape(
+                    str(info["life_span"])
+                )}
             </div>
             """,
             unsafe_allow_html=True
@@ -1042,7 +1104,7 @@ for index, dog in enumerate(
 
 
         # ----------------------------------------------------
-        # BUTTON
+        # VIEW BUTTON
         # ----------------------------------------------------
 
         if st.button(
@@ -1054,3 +1116,14 @@ for index, dog in enumerate(
             st.session_state.selected_breed = dog
 
             st.rerun()
+
+
+# ============================================================
+# FOOTER
+# ============================================================
+
+st.divider()
+
+st.caption(
+    "🐶 Dog Encyclopedia · Photos provided by Dog CEO API"
+)
