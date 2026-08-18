@@ -14,14 +14,14 @@ st.set_page_config(
 
 
 # ============================================================
-# API
+# API URLS
 # ============================================================
 
 BREEDS_URL = "https://dog.ceo/api/breeds/list/all"
 
 
 # ============================================================
-# GET BREEDS
+# GET ALL BREEDS
 # ============================================================
 
 @st.cache_data(ttl=3600)
@@ -38,15 +38,15 @@ def get_breeds():
 
 
 # ============================================================
-# GET BREED IMAGE
+# GET BREED IMAGES
 # ============================================================
 
 @st.cache_data(ttl=3600)
-def get_breed_image(breed):
+def get_breed_images(breed, amount=6):
 
     url = (
         f"https://dog.ceo/api/"
-        f"breed/{breed}/images/random"
+        f"breed/{breed}/images"
     )
 
     response = requests.get(
@@ -56,7 +56,10 @@ def get_breed_image(breed):
 
     response.raise_for_status()
 
-    return response.json()["message"]
+    images = response.json()["message"]
+
+    # Return only a few images
+    return images[:amount]
 
 
 # ============================================================
@@ -79,18 +82,138 @@ except Exception as error:
 
 
 # ============================================================
-# TITLE
+# SESSION STATE
 # ============================================================
 
-st.title("🐶 Dog Encyclopedia")
+if "selected_breed" not in st.session_state:
 
-st.write(
-    "Explore dog breeds and discover beautiful dog photos."
+    st.session_state.selected_breed = None
+
+
+# ============================================================
+# BREED DETAIL PAGE
+# ============================================================
+
+if st.session_state.selected_breed:
+
+    breed = st.session_state.selected_breed
+
+    # --------------------------------------------------------
+    # BACK BUTTON
+    # --------------------------------------------------------
+
+    if st.button("← Back to all breeds"):
+
+        st.session_state.selected_breed = None
+
+        st.rerun()
+
+    # --------------------------------------------------------
+    # TITLE
+    # --------------------------------------------------------
+
+    st.title(
+        f"🐶 {breed.title()}"
+    )
+
+    st.write(
+        f"Explore photos of the {breed.title()}."
+    )
+
+    st.divider()
+
+    # --------------------------------------------------------
+    # GET PHOTOS
+    # --------------------------------------------------------
+
+    try:
+
+        images = get_breed_images(
+            breed,
+            amount=8
+        )
+
+    except Exception as error:
+
+        st.error(
+            "Could not load breed photos."
+        )
+
+        st.write(error)
+
+        st.stop()
+
+
+    # --------------------------------------------------------
+    # PHOTO GALLERY
+    # --------------------------------------------------------
+
+    st.subheader(
+        "📸 Photo Gallery"
+    )
+
+    columns = st.columns(4)
+
+    for index, image in enumerate(images):
+
+        with columns[index % 4]:
+
+            st.image(
+                image,
+                use_container_width=True
+            )
+
+
+    # --------------------------------------------------------
+    # VIDEOS
+    # --------------------------------------------------------
+
+    st.divider()
+
+    st.subheader(
+        "🎥 Videos"
+    )
+
+    youtube_url = (
+        "https://www.youtube.com/results?search_query="
+        + breed
+        + "+dog"
+    )
+
+    st.link_button(
+        f"▶ Watch {breed.title()} videos",
+        youtube_url
+    )
+
+
+    # --------------------------------------------------------
+    # BASIC INFORMATION
+    # --------------------------------------------------------
+
+    st.divider()
+
+    st.subheader(
+        "📖 About this breed"
+    )
+
+    st.info(
+        "Detailed breed information will be added "
+        "in the next step."
+    )
+
+    st.stop()
+
+
+# ============================================================
+# HOME PAGE
+# ============================================================
+
+st.title(
+    "🐶 Dog Encyclopedia"
 )
 
-
-st.success(
-    f"🐕 Found {len(breeds)} dog breeds!"
+st.write(
+    "Explore dog breeds, photos and videos."
 )
 
 
@@ -115,7 +238,8 @@ if search:
     filtered_breeds = [
         breed
         for breed in breeds
-        if search.lower() in breed.lower()
+        if search.lower()
+        in breed.lower()
     ]
 
 
@@ -125,7 +249,7 @@ st.write(
 
 
 # ============================================================
-# DISPLAY BREEDS
+# BREED CARDS
 # ============================================================
 
 columns = st.columns(4)
@@ -136,25 +260,29 @@ for index, breed in enumerate(filtered_breeds):
     with columns[index % 4]:
 
         # ----------------------------------------------------
-        # GET IMAGE
+        # GET ONE PHOTO
         # ----------------------------------------------------
 
         try:
 
-            image_url = get_breed_image(
-                breed
+            images = get_breed_images(
+                breed,
+                amount=1
             )
 
-            st.image(
-                image_url,
-                use_container_width=True
-            )
+            if images:
+
+                st.image(
+                    images[0],
+                    use_container_width=True
+                )
 
         except Exception:
 
             st.info(
                 "No image available"
             )
+
 
         # ----------------------------------------------------
         # BREED NAME
@@ -164,18 +292,17 @@ for index, breed in enumerate(filtered_breeds):
             breed.title()
         )
 
+
         # ----------------------------------------------------
-        # VIDEO SEARCH
+        # VIEW BREED BUTTON
         # ----------------------------------------------------
 
-        youtube_url = (
-            "https://www.youtube.com/results?search_query="
-            + breed
-            + "+dog"
-        )
-
-        st.link_button(
-            "🎥 Watch videos",
-            youtube_url,
+        if st.button(
+            "View breed →",
+            key=f"breed_{breed}",
             use_container_width=True
-        )
+        ):
+
+            st.session_state.selected_breed = breed
+
+            st.rerun()
