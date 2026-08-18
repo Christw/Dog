@@ -18,7 +18,9 @@ st.set_page_config(
 # API CONFIGURATION
 # ============================================================
 
-BREEDS_URL = "https://dog.ceo/api/breeds/list/all"
+BREEDS_URL = (
+    "https://dog.ceo/api/breeds/list/all"
+)
 
 
 # ============================================================
@@ -39,7 +41,7 @@ def get_breeds():
 
 
 # ============================================================
-# GET IMAGES
+# GET BREED IMAGES
 # ============================================================
 
 @st.cache_data(ttl=3600)
@@ -49,6 +51,10 @@ def get_breed_images(
     amount=8
 ):
 
+    # --------------------------------------------------------
+    # SUB-BREED
+    # --------------------------------------------------------
+
     if sub_breed:
 
         url = (
@@ -57,12 +63,17 @@ def get_breed_images(
             f"{sub_breed}/images"
         )
 
+    # --------------------------------------------------------
+    # NORMAL BREED
+    # --------------------------------------------------------
+
     else:
 
         url = (
             f"https://dog.ceo/api/"
             f"breed/{breed}/images"
         )
+
 
     response = requests.get(
         url,
@@ -77,7 +88,7 @@ def get_breed_images(
 
 
 # ============================================================
-# LOAD OUR BREED INFORMATION
+# LOAD DOG INFORMATION
 # ============================================================
 
 @st.cache_data
@@ -93,12 +104,105 @@ def load_breed_information():
 
 
 # ============================================================
+# FIND BREED INFORMATION
+# ============================================================
+
+def get_breed_information(
+    breed,
+    sub_breed=None
+):
+
+    # --------------------------------------------------------
+    # BUILD SEARCH NAME
+    # --------------------------------------------------------
+
+    if sub_breed:
+
+        search_name = (
+            f"{sub_breed} {breed}"
+        )
+
+    else:
+
+        search_name = breed
+
+
+    search_name = search_name.lower()
+
+
+    # --------------------------------------------------------
+    # SEARCH JSON
+    # --------------------------------------------------------
+
+    for dog in breed_information:
+
+        if (
+            dog["breed"].lower()
+            == search_name
+        ):
+
+            return dog
+
+
+    # --------------------------------------------------------
+    # FALLBACK
+    # --------------------------------------------------------
+
+    if sub_breed:
+
+        display_name = (
+            f"{sub_breed.title()} "
+            f"{breed.title()}"
+        )
+
+    else:
+
+        display_name = breed.title()
+
+
+    return {
+
+        "breed": search_name,
+
+        "name": display_name,
+
+        "origin": "Information not available",
+
+        "group": "Information not available",
+
+        "size": "Information not available",
+
+        "height": "Information not available",
+
+        "weight": "Information not available",
+
+        "life_span": "Information not available",
+
+        "temperament": "Information not available",
+
+        "energy": "Information not available",
+
+        "grooming": "Information not available",
+
+        "description": (
+            f"{display_name} is a dog breed "
+            f"or breed variety available in "
+            f"the Dog Encyclopedia. Detailed "
+            f"information will be added soon."
+        )
+    }
+
+
+# ============================================================
 # CREATE BREED LIST
 # ============================================================
 
-def create_breed_list(breeds):
+def create_breed_list(
+    breeds
+):
 
     result = []
+
 
     for breed, sub_breeds in breeds.items():
 
@@ -108,93 +212,46 @@ def create_breed_list(breeds):
 
         if not sub_breeds:
 
-            result.append(
-                {
-                    "id": breed,
-                    "breed": breed,
-                    "sub_breed": None,
-                    "display_name": breed.title()
-                }
-            )
+            result.append({
+
+                "id": breed,
+
+                "breed": breed,
+
+                "sub_breed": None,
+
+                "display_name": breed.title()
+
+            })
+
 
         # ----------------------------------------------------
-        # BREED WITH SUB-BREEDS
+        # SUB-BREEDS
         # ----------------------------------------------------
 
         else:
 
             for sub_breed in sub_breeds:
 
-                result.append(
-                    {
-                        "id": f"{breed}_{sub_breed}",
-                        "breed": breed,
-                        "sub_breed": sub_breed,
-                        "display_name": (
-                            f"{sub_breed.title()} "
-                            f"{breed.title()}"
-                        )
-                    }
-                )
+                result.append({
+
+                    "id": (
+                        f"{breed}_{sub_breed}"
+                    ),
+
+                    "breed": breed,
+
+                    "sub_breed": sub_breed,
+
+                    "display_name": (
+                        f"{sub_breed.title()} "
+                        f"{breed.title()}"
+                    )
+
+                })
+
 
     return result
-
-
-# ============================================================
-# FIND INFORMATION
-# ============================================================
-
-def get_breed_information(
-    breed,
-    sub_breed=None
-):
-
-    search_name = (
-        f"{sub_breed} {breed}"
-        if sub_breed
-        else breed
-    )
-
-    search_name = search_name.lower()
-
-    # --------------------------------------------------------
-    # Look for manually curated information
-    # --------------------------------------------------------
-
-    for dog in breed_information:
-
-        if dog["breed"].lower() == search_name:
-
-            return dog
-
-    # --------------------------------------------------------
-    # Create fallback information
-    # --------------------------------------------------------
-
-    display_name = (
-        f"{sub_breed.title()} {breed.title()}"
-        if sub_breed
-        else breed.title()
-    )
-
-    return {
-        "breed": search_name,
-        "name": display_name,
-        "origin": "Information not available",
-        "size": "Information not available",
-        "height": "Information not available",
-        "weight": "Information not available",
-        "life_span": "Information not available",
-        "temperament": "Information not available",
-        "energy": "Information not available",
-        "grooming": "Information not available",
-        "description": (
-            f"{display_name} is a dog breed or breed variety "
-            f"available in the Dog Encyclopedia. "
-            f"More detailed information about this breed "
-            f"will be added soon."
-        )
-    }
 
 
 # ============================================================
@@ -218,7 +275,9 @@ except Exception as error:
 
 try:
 
-    breed_information = load_breed_information()
+    breed_information = (
+        load_breed_information()
+    )
 
 except Exception as error:
 
@@ -253,11 +312,15 @@ if "selected_breed" not in st.session_state:
 # BREED DETAIL PAGE
 # ============================================================
 
-if st.session_state.selected_breed:
+if (
+    st.session_state.selected_breed
+    is not None
+):
 
     selected = (
         st.session_state.selected_breed
     )
+
 
     breed = selected["breed"]
 
@@ -267,6 +330,7 @@ if st.session_state.selected_breed:
         "display_name"
     ]
 
+
     info = get_breed_information(
         breed,
         sub_breed
@@ -274,7 +338,7 @@ if st.session_state.selected_breed:
 
 
     # ========================================================
-    # BACK
+    # BACK BUTTON
     # ========================================================
 
     if st.button(
@@ -296,7 +360,7 @@ if st.session_state.selected_breed:
 
 
     # ========================================================
-    # GET IMAGES
+    # PHOTOS
     # ========================================================
 
     try:
@@ -319,7 +383,7 @@ if st.session_state.selected_breed:
 
 
     # ========================================================
-    # MAIN PHOTO
+    # MAIN IMAGE
     # ========================================================
 
     if images:
@@ -334,47 +398,48 @@ if st.session_state.selected_breed:
     # BREED OVERVIEW
     # ========================================================
 
-    if info:
+    st.divider()
 
-        st.divider()
+    st.subheader(
+        "📋 Breed Overview"
+    )
 
-        st.subheader(
-            "📋 Breed Overview"
+
+    col1, col2, col3, col4 = (
+        st.columns(4)
+    )
+
+
+    with col1:
+
+        st.metric(
+            "📏 Size",
+            info["size"]
         )
 
-        col1, col2, col3, col4 = st.columns(4)
+
+    with col2:
+
+        st.metric(
+            "⏳ Life span",
+            info["life_span"]
+        )
 
 
-        with col1:
+    with col3:
 
-            st.metric(
-                "📏 Size",
-                info["size"]
-            )
-
-
-        with col2:
-
-            st.metric(
-                "⏳ Life span",
-                info["life_span"]
-            )
+        st.metric(
+            "⚡ Energy",
+            info["energy"]
+        )
 
 
-        with col3:
+    with col4:
 
-            st.metric(
-                "⚡ Energy",
-                info["energy"]
-            )
-
-
-        with col4:
-
-            st.metric(
-                "✂️ Grooming",
-                info["grooming"]
-            )
+        st.metric(
+            "✂️ Grooming",
+            info["grooming"]
+        )
 
 
     # ========================================================
@@ -387,69 +452,60 @@ if st.session_state.selected_breed:
         "📖 About this breed"
     )
 
-    if info:
 
-        st.write(
-            info["description"]
-        )
-
-    else:
-
-        st.info(
-            "A detailed description for this breed "
-            "has not been added yet."
-        )
+    st.write(
+        info["description"]
+    )
 
 
     # ========================================================
     # BREED FACTS
     # ========================================================
 
-    if info:
+    st.divider()
 
-        st.divider()
+    st.subheader(
+        "🐕 Breed Facts"
+    )
 
-        st.subheader(
-            "🐕 Breed Facts"
+
+    col1, col2 = st.columns(2)
+
+
+    with col1:
+
+        st.write(
+            f"**🌍 Origin**  \n"
+            f"{info['origin']}"
         )
 
-        col1, col2 = st.columns(2)
+        st.write(
+            f"**📏 Height**  \n"
+            f"{info['height']}"
+        )
+
+        st.write(
+            f"**⚖️ Weight**  \n"
+            f"{info['weight']}"
+        )
 
 
-        with col1:
+    with col2:
 
-            st.write(
-                f"**🌍 Origin**  \n"
-                f"{info['origin']}"
-            )
+        st.write(
+            f"**❤️ Temperament**  \n"
+            f"{info['temperament']}"
+        )
 
-            st.write(
-                f"**📏 Height**  \n"
-                f"{info['height']}"
-            )
+        st.write(
+            f"**⚡ Energy**  \n"
+            f"{info['energy']}"
+        )
 
-            st.write(
-                f"**⚖️ Weight**  \n"
-                f"{info['weight']}"
-            )
-
-
-        with col2:
-
-            st.write(
-                f"**❤️ Temperament**  \n"
-                f"{info['temperament']}"
-            )
-
-            st.write(
-                f"**⚡ Energy**  \n"
-                f"{info['energy']}"
-            )
-
-            st.write(
-                f"**✂️ Grooming**  \n"
-                f"{info['grooming']}"
-            )
+        st.write(
+            f"**✂️ Grooming**  \n"
+            f"{info['grooming']}"
+        )
 
 
     # ========================================================
@@ -462,12 +518,16 @@ if st.session_state.selected_breed:
         "📸 Photo Gallery"
     )
 
+
     if len(images) > 1:
+
+        gallery = images[1:]
 
         columns = st.columns(4)
 
+
         for index, image in enumerate(
-            images[1:]
+            gallery
         ):
 
             with columns[index % 4]:
@@ -488,18 +548,20 @@ if st.session_state.selected_breed:
         "🎥 Videos"
     )
 
-    youtube_search = (
-        display_name.replace(
-            " ",
-            "+"
-        )
+
+    youtube_query = (
+        display_name
+        .replace(" ", "+")
         + "+dog+breed"
     )
 
+
     youtube_url = (
-        "https://www.youtube.com/results?search_query="
-        + youtube_search
+        "https://www.youtube.com/results?"
+        "search_query="
+        + youtube_query
     )
+
 
     st.link_button(
         f"▶ Watch {display_name} videos",
@@ -508,10 +570,11 @@ if st.session_state.selected_breed:
 
 
     # ========================================================
-    # BACK
+    # BACK BUTTON
     # ========================================================
 
     st.divider()
+
 
     if st.button(
         "← Back to all breeds",
@@ -534,9 +597,10 @@ st.title(
     "🐶 Dog Encyclopedia"
 )
 
+
 st.write(
-    "Explore dog breeds, photos, characteristics "
-    "and videos."
+    "Explore dog breeds, photos, "
+    "characteristics and videos."
 )
 
 
@@ -566,7 +630,7 @@ with col2:
 with col3:
 
     st.metric(
-        "📸 Image source",
+        "📸 Photo source",
         "Dog CEO"
     )
 
@@ -577,56 +641,78 @@ with col3:
 
 st.divider()
 
+
 search = st.text_input(
     "🔎 Search for a dog breed",
-    placeholder="Try Golden Retriever..."
-)
-
-# ============================================================
-# BREED GROUP FILTER
-# ============================================================
-
-breed_groups = sorted(
-    list(
-        set(
-            dog["breed"]
-            for dog in all_breeds
-        )
+    placeholder=(
+        "Try Golden Retriever, "
+        "Labrador, Poodle..."
     )
 )
 
-group_options = [
-    "All breeds"
-] + breed_groups
 
-selected_group = st.selectbox(
-    "🐕 Breed category",
-    group_options
+# ============================================================
+# SORTING
+# ============================================================
+
+sort_option = st.selectbox(
+    "↕️ Sort breeds",
+    [
+        "A → Z",
+        "Z → A"
+    ]
 )
 
-if selected_group != "All breeds":
-
-    filtered_breeds = [
-        dog
-        for dog in filtered_breeds
-        if dog["breed"] == selected_group
-    ]
 
 # ============================================================
-# FILTER
+# FILTER BREEDS
 # ============================================================
 
-filtered_breeds = all_breeds.copy()
+filtered_breeds = (
+    all_breeds.copy()
+)
 
+
+# ============================================================
+# SEARCH FILTER
+# ============================================================
 
 if search:
 
     filtered_breeds = [
+
         dog
-        for dog in all_breeds
-        if search.lower()
-        in dog["display_name"].lower()
+
+        for dog in filtered_breeds
+
+        if (
+            search.lower()
+            in dog["display_name"].lower()
+        )
+
     ]
+
+
+# ============================================================
+# SORT
+# ============================================================
+
+if sort_option == "A → Z":
+
+    filtered_breeds = sorted(
+        filtered_breeds,
+        key=lambda dog:
+            dog["display_name"].lower()
+    )
+
+else:
+
+    filtered_breeds = sorted(
+        filtered_breeds,
+        key=lambda dog:
+            dog["display_name"].lower(),
+        reverse=True
+    )
 
 
 # ============================================================
@@ -711,40 +797,33 @@ for index, dog in enumerate(
         # DESCRIPTION
         # ----------------------------------------------------
 
-        if info:
+        description = (
+            info["description"]
+        )
 
-            description = info[
-                "description"
-            ]
 
-            if len(description) > 120:
+        if len(description) > 120:
 
-                description = (
-                    description[:120]
-                    + "..."
-                )
-
-            st.write(
-                description
+            description = (
+                description[:120]
+                + "..."
             )
 
-        else:
 
-            st.caption(
-                "Breed information coming soon."
-            )
+        st.write(
+            description
+        )
 
 
         # ----------------------------------------------------
-        # LIFE SPAN
+        # BASIC INFO
         # ----------------------------------------------------
 
-        if info:
-
-            st.caption(
-                f"⏳ {info['life_span']} "
-                f"• ⚡ {info['energy']}"
-            )
+        st.caption(
+            f"⏳ {info['life_span']} "
+            f" • "
+            f"⚡ {info['energy']}"
+        )
 
 
         # ----------------------------------------------------
@@ -760,27 +839,3 @@ for index, dog in enumerate(
             st.session_state.selected_breed = dog
 
             st.rerun()
-        sort_option = st.selectbox(
-    "↕️ Sort breeds",
-    [
-        "A → Z",
-        "Z → A"
-    ]
-)
-        if sort_option == "A → Z":
-
-    filtered_breeds = sorted(
-        filtered_breeds,
-        key=lambda x: x["display_name"].lower()
-    )
-
-        else:
-
-    filtered_breeds = sorted(
-        filtered_breeds,
-        key=lambda x: x["display_name"].lower(),
-        reverse=True
-    )
-
-
-
