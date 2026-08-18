@@ -916,29 +916,6 @@ if st.session_state.selected_breed:
     st.stop()
 
 
-# ============================================================
-# HOME PAGE
-# ============================================================
-
-st.markdown(
-    """
-    <div class="hero">
-
-        <div class="hero-title">
-            🐶 Dog Encyclopedia
-        </div>
-
-        <div class="hero-subtitle">
-            Discover dog breeds, explore beautiful
-            photos, learn about their characteristics,
-            and find videos about your favorite dogs.
-        </div>
-
-    </div>
-    """,
-    unsafe_allow_html=True
-)
-
 
 # ============================================================
 # STATISTICS
