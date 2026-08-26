@@ -751,6 +751,64 @@ div[data-testid="stPopoverBody"] div[data-testid="stButton"] button p {
     font-size: 14px !important;
 }
 
+/* ============================================================
+   MOBILE NAVIGATION
+   Keep logo + hamburger on same row
+   ============================================================ */
+
+.st-key-main_navigation div[data-testid="stHorizontalBlock"] {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    width: 100% !important;
+}
+
+/* Logo side */
+.st-key-main_navigation div[data-testid="stHorizontalBlock"]
+> div[data-testid="stColumn"]:first-child {
+    flex: 1 1 auto !important;
+    width: auto !important;
+    min-width: 0 !important;
+}
+
+/* Menu side */
+.st-key-main_navigation div[data-testid="stHorizontalBlock"]
+> div[data-testid="stColumn"]:last-child {
+    flex: 0 0 auto !important;
+    width: auto !important;
+    min-width: fit-content !important;
+}
+
+/* Remove unnecessary vertical spacing */
+.st-key-main_navigation div[data-testid="stVerticalBlock"] {
+    gap: 0 !important;
+}
+
+@media (max-width: 768px) {
+
+    .st-key-main_navigation {
+        width: 100%;
+    }
+
+    .st-key-main_navigation button[kind="tertiary"] {
+        white-space: nowrap !important;
+    }
+
+    .st-key-main_navigation div[data-testid="stPopover"] {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: flex-end !important;
+    }
+
+    .st-key-main_navigation div[data-testid="stPopover"] > button {
+        margin: 0 !important;
+        padding: 0 4px !important;
+        height: 40px !important;
+        min-height: 40px !important;
+    }
+}
+
     </style>
     """,
     unsafe_allow_html=True,
@@ -1622,50 +1680,53 @@ def get_nl_dog_videos(max_results=2):
 
 def main_navigation():
 
-    nav_left, nav_menu = st.columns(
-        [9.5, 0.5],
-        vertical_alignment="center"
-    )
+    with st.container(key="main_navigation"):
 
-    with nav_left:
-        home_link()
+        nav_left, nav_menu = st.columns(
+            [9.5, 0.5],
+            vertical_alignment="center",
+            gap="small"
+        )
 
-    with nav_menu:
+        with nav_left:
+            home_link()
 
-        with st.popover(
-            "☰",
-            use_container_width=False
-        ):
+        with nav_menu:
 
-            if st.button(
-                "Find your match",
-                key=f"menu_match_{st.session_state.page}",
-                use_container_width=True
+            with st.popover(
+                "☰",
+                use_container_width=False
             ):
-                st.session_state.page = "quiz"
-                st.session_state.selected_breed = None
-                st.query_params.clear()
-                st.rerun()
 
-            if st.button(
-                "Dog training",
-                key=f"menu_training_{st.session_state.page}",
-                use_container_width=True
-            ):
-                st.session_state.page = "training"
-                st.session_state.selected_breed = None
-                st.query_params.clear()
-                st.rerun()
+                if st.button(
+                    "Find your match",
+                    key=f"menu_match_{st.session_state.page}",
+                    use_container_width=True
+                ):
+                    st.session_state.page = "quiz"
+                    st.session_state.selected_breed = None
+                    st.query_params.clear()
+                    st.rerun()
 
-            if st.button(
-                "Getting a dog in NL",
-                key=f"menu_nl_{st.session_state.page}",
-                use_container_width=True
-            ):
-                st.session_state.page = "get_dog_nl"
-                st.session_state.selected_breed = None
-                st.query_params.clear()
-                st.rerun()
+                if st.button(
+                    "Dog training",
+                    key=f"menu_training_{st.session_state.page}",
+                    use_container_width=True
+                ):
+                    st.session_state.page = "training"
+                    st.session_state.selected_breed = None
+                    st.query_params.clear()
+                    st.rerun()
+
+                if st.button(
+                    "Getting a dog in NL",
+                    key=f"menu_nl_{st.session_state.page}",
+                    use_container_width=True
+                ):
+                    st.session_state.page = "get_dog_nl"
+                    st.session_state.selected_breed = None
+                    st.query_params.clear()
+                    st.rerun()
 
 # ============================================================
 # LOAD DATA
