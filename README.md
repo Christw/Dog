@@ -1,4 +1,4 @@
-# Dog Encyclopedia — Fast Image Version
+# Dog Encyclopedia
 
 This version makes the homepage fast by preparing one optimized local image per breed **once**.
 
