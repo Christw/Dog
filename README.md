@@ -1,14 +1,18 @@
-# Dog Encyclopedia
+# 🐶 Dog Encyclopedia
 
-This version makes the homepage fast by preparing one optimized local image per breed **once**.
+A Streamlit web app for exploring dog breeds, with breed information and optimized local images for fast loading.
 
-## 1. Install
+## Installation
+
+Install the required dependencies:
 
 ```bash
 python3 -m pip install -r requirements.txt
 ```
 
-## 2. Build the local image cache once
+## Build the Image Cache
+
+Before running the app for the first time, build the local image cache:
 
 ```bash
 python3 build_home_images.py
@@ -16,27 +20,44 @@ python3 build_home_images.py
 
 This creates:
 
-- `breed_images/`
-- `breed_images.json`
+- `breed_images/` — optimized images for each breed
+- `breed_images.json` — image metadata used by the app
 
-The builder rejects pictures smaller than **450×300** when possible. If a breed has no image above that threshold, it uses the largest valid image it can find so the card does not stay blank.
+The image builder prioritizes images that are at least **450 × 300 pixels**. If no image meets this requirement, it uses the largest valid image available so that the breed card does not remain blank.
 
-## 3. Run the website
+## Run the App
+
+Start the Streamlit application with:
 
 ```bash
 streamlit run app.py
 ```
 
-## Breed descriptions
+The app should then open in your browser.
 
-A blank `dogs.json` is included so the app runs immediately. If you already have your populated `dogs.json`, replace the included file with your existing one.
+## Breed Descriptions
 
-## Rebuild images
+A blank `dogs.json` file is included so the app can run immediately.
 
-Delete the `breed_images` folder and `breed_images.json`, then run:
+If you already have a populated `dogs.json`, replace the included file with your own version.
+
+## Rebuild the Image Cache
+
+If you want to refresh the breed images, delete:
+
+```text
+breed_images/
+breed_images.json
+```
+
+Then run:
 
 ```bash
-python3 -m streamlit run app.py
+python3 build_home_images.py
 ```
-git config --global user.name "Christw"
-git config --global user.email "st950314tw@gmail.com"
+
+After rebuilding the cache, start the app:
+
+```bash
+streamlit run app.py
+```
