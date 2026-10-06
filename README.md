@@ -61,3 +61,6 @@ After rebuilding the cache, start the app:
 ```bash
 streamlit run app.py
 ```
+
+## Link to the website
+https://dog-encyclopedia.streamlit.app/
