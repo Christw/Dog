@@ -1727,6 +1727,15 @@ def main_navigation():
                     st.session_state.selected_breed = None
                     st.query_params.clear()
                     st.rerun()
+                if st.button(
+                    "Dog AI Assistant",
+                    key=f"menu_ai_{st.session_state.page}",
+                    use_container_width=True
+                ):
+                    st.session_state.page = "ai_assistant"
+                    st.session_state.selected_breed = None
+                    st.query_params.clear()
+                    st.rerun()
 
 # ============================================================
 # LOAD DATA
@@ -1767,7 +1776,8 @@ if page_param in [
     "home",
     "quiz",
     "training",
-    "get_dog_nl"
+    "get_dog_nl",
+    "ai_assistant"
 ]:
     st.session_state.page = page_param
 
@@ -1956,6 +1966,20 @@ if st.session_state.selected_breed:
             unsafe_allow_html=True,
         )
         st.stop()
+
+# ============================================================
+# DOG AI ASSISTANT
+# ============================================================
+
+if st.session_state.page == "ai_assistant":
+
+    main_navigation()
+
+    from agent.chat_ui import render_chat_page
+
+    render_chat_page()
+
+    st.stop()
 
 # ============================================================
 # FIND YOUR DOG

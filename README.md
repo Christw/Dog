@@ -64,3 +64,6 @@ streamlit run app.py
 
 ## Link to the website
 https://dog-encyclopedia.streamlit.app/
+
+
+### python3 -m streamlit run app.py         
