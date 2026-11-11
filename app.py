@@ -20,6 +20,8 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 
+
+
 # ============================================================
 # CSS
 # ============================================================
@@ -1899,6 +1901,7 @@ def home_link():
         st.session_state.page = "home"
         st.session_state.selected_breed = None
         st.query_params.clear()
+        st.session_state.returning_home = True
         st.rerun()
 
 @st.cache_data(ttl=86400)
@@ -3027,6 +3030,7 @@ if st.session_state.page == "get_dog_nl":
         )
 
     st.stop()
+
 
 
 # ============================================================

@@ -14,7 +14,8 @@ def render_chat_page():
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
 
-    prompt = st.chat_input("Ask a question about dogs...")
+    with st.container():
+        prompt = st.chat_input("Ask a question about dogs...")
 
     if prompt:
         st.session_state.dog_chat_history.append({
