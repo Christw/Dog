@@ -658,7 +658,7 @@ breed_information = [
         'description': 'The Dane is a companion / other dog associated with Europe / International. It is known for its distinctive breed type and individual personality. Exercise, training, socialization and grooming needs can vary between individual dogs.',
     },
     {
-        'breed': 'swedish-farmdog danish',
+        'breed': 'farmdog danishswedish',
         'name': 'Danish-Swedish Farmdog',
         'origin': 'Denmark / Sweden',
         'group': 'Working / Companion',
