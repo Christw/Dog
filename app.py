@@ -2,6 +2,7 @@ import os
 import json
 import html
 import streamlit as st
+import streamlit.components.v1 as components
 import requests
 from PIL import Image, ImageOps
 import base64
@@ -33,8 +34,46 @@ st.markdown(
         --accent: #ff385c;
     }
 
-    .stApp { background: white; }
+    .stApp {
+        background:
+            radial-gradient(ellipse at 12% 12%, rgba(255, 224, 205, .72), transparent 34%),
+            radial-gradient(ellipse at 88% 18%, rgba(222, 211, 255, .76), transparent 36%),
+            linear-gradient(125deg, #fff9ef 0%, #fff0ef 48%, #f3efff 100%);
+    }
     .block-container { max-width: 1320px; padding-top: 1rem; padding-bottom: 4rem; }
+    /* Homepage hero: one cohesive, responsive section */
+    div[data-testid="stHorizontalBlock"]:has(iframe[title="streamlit.components.v1.html"]) {
+        align-items: center;
+        gap: clamp(1.25rem, 3vw, 3rem);
+        padding: clamp(1.25rem, 3.5vw, 3.25rem);
+        border: 1px solid rgba(255,255,255,.78);
+        border-radius: 32px;
+        background: linear-gradient(115deg, rgba(255,250,241,.94), rgba(255,239,241,.91) 52%, rgba(241,236,255,.94));
+        box-shadow: 0 24px 70px rgba(91, 61, 120, .10);
+        overflow: hidden;
+    }
+    div[data-testid="stHorizontalBlock"]:has(iframe[title="streamlit.components.v1.html"]) > div {
+        min-width: 0;
+    }
+    div[data-testid="stHorizontalBlock"]:has(iframe[title="streamlit.components.v1.html"]) iframe {
+        border-radius: 24px;
+        overflow: hidden;
+    }
+    @media (max-width: 760px) {
+        div[data-testid="stHorizontalBlock"]:has(iframe[title="streamlit.components.v1.html"]) {
+            flex-direction: column !important;
+            padding: 1.15rem;
+            gap: 1rem;
+            border-radius: 24px;
+        }
+        div[data-testid="stHorizontalBlock"]:has(iframe[title="streamlit.components.v1.html"]) > div {
+            width: 100% !important;
+            flex: 1 1 auto !important;
+        }
+        div[data-testid="stHorizontalBlock"]:has(iframe[title="streamlit.components.v1.html"]) iframe {
+            width: 100% !important;
+        }
+    }
     #MainMenu, footer, [data-testid="stHeader"] { display: none !important; }
 
     .top-nav {
@@ -42,12 +81,24 @@ st.markdown(
         align-items: center; border-bottom: 1px solid var(--border); margin-bottom: 28px;
     }
     .brand { font-size: 19px; font-weight: 750; color: var(--text); }
-    .hero { padding: 28px 0 36px 0; }
+    .hero { padding: 28px 10px 36px 4px; }
     .hero-title {
-        margin: 0; font-size: clamp(42px, 5vw, 66px); line-height: 1;
-        letter-spacing: -2.7px; font-weight: 800; color: var(--text);
+        margin: 0; font-size: clamp(42px, 5.4vw, 76px); line-height: .99;
+        letter-spacing: -3.2px; font-weight: 850; color: #292333;
+        max-width: 610px;
     }
-    .hero-title span { color: var(--accent); }
+    .hero-title span {
+        background: linear-gradient(100deg, #e17c75, #9a78d5);
+        -webkit-background-clip: text; background-clip: text; color: transparent;
+    }
+    .hero-copy {
+        max-width: 440px; margin-top: 20px; color: #6e6574;
+        font-size: clamp(15px, 1.4vw, 18px); line-height: 1.7;
+    }
+    @media (max-width: 760px) {
+        .hero { padding: 10px 4px 2px; }
+        .hero-title { font-size: clamp(42px, 11vw, 60px); letter-spacing: -2px; }
+    }
     .section-title {
         margin-top: 36px; margin-bottom: 6px; font-size: 25px;
         font-weight: 750; letter-spacing: -0.5px; color: var(--text);
@@ -1150,6 +1201,236 @@ GET_DOG_NL_STEPS = [
         ),
     },
 ]
+
+# ============================================================
+# PAT THE SHIBA WIDGET
+# Original interactive Shiba design embedded for the homepage.
+# ============================================================
+PAT_THE_SHIBA_HTML = r'''<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pat the Shiba</title>
+<style>
+:root{--bg:#F4F1EC;--panel:#FFFFFF;--text:#1A1C22;--muted:#5B6270;--line:#E0DCD3;--accent:#5B3DF5;--on:#FFFFFF;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#101216;--panel:#1A1D24;--text:#F2F3F5;--muted:#A3A9B6;--line:#2B303B;--accent:#8B7BFF;--on:#101216}}
+:root[data-theme="dark"]{--bg:#101216;--panel:#1A1D24;--text:#F2F3F5;--muted:#A3A9B6;--line:#2B303B;--accent:#8B7BFF;--on:#101216}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{width:100%;max-width:560px;margin:0 auto;padding:4px 0 8px;display:flex;flex-direction:column;gap:12px;background:transparent;border:0;border-radius:0;box-shadow:none}
+.pat-hint{display:flex;align-items:center;justify-content:center;gap:9px;margin:0 auto 2px;padding:9px 16px;border:1px solid rgba(255,255,255,.78);border-radius:999px;background:rgba(255,255,255,.62);color:#745b87;font-size:14px;font-weight:750;letter-spacing:.1px;box-shadow:0 5px 18px rgba(91,61,120,.07)}
+.pat-hint .hand{display:inline-block;font-size:19px;transform-origin:70% 80%;animation:patWave 1.5s ease-in-out infinite}
+@keyframes patWave{0%,100%{transform:rotate(0)}25%{transform:rotate(-18deg)}50%{transform:rotate(9deg)}75%{transform:rotate(-12deg)}}
+h1{margin:0;font-size:clamp(30px,7vw,44px);line-height:1.1}
+p{margin:6px 0 0;color:var(--muted)}
+.stage{position:relative;background:transparent;border:0;border-radius:0;padding:0 4px;overflow:hidden}
+svg{display:block;width:100%;max-width:420px;margin:0 auto;touch-action:none;user-select:none;-webkit-user-select:none}
+[data-act]{cursor:pointer}
+.heart{position:absolute;width:22px;pointer-events:none}
+.bubble{position:absolute;font-weight:800;color:var(--accent);pointer-events:none}
+.tail{transform-origin:290px 340px;animation:sway 3s ease-in-out infinite}
+.joy .tail{animation:wag var(--wag,.26s) ease-in-out infinite alternate}
+.dogw{transform-origin:200px 392px;animation:breathe 3.2s ease-in-out infinite}
+.eyes{transform-origin:200px 165px;animation:blink 5s infinite}
+.happy,.tongue,.grin,.spark,.heartEyes{opacity:0;transition:opacity .2s}
+.cheek{opacity:.35;transition:opacity .4s}
+.lv1 .cheek{opacity:.55}.lv2 .cheek{opacity:.75}
+.lv2 .grin,.lv2 .spark,.lv2 .tongue{opacity:1}
+.joy .eyes{opacity:0}.joy .happy,.joy .tongue{opacity:1}
+.lv3 .eyes,.lv3 .happy{opacity:0}.lv3 .heartEyes{opacity:1}
+.ear{transition:transform .3s}
+.ear.l{transform-origin:128px 140px}.ear.r{transform-origin:272px 140px}
+.joy .ear.l{transform:rotate(-10deg)}.joy .ear.r{transform:rotate(10deg)}
+#head{transform-origin:200px 275px}#nose{transform-origin:200px 204px}
+@keyframes sway{0%,100%{transform:rotate(-4deg)}50%{transform:rotate(5deg)}}
+@keyframes wag{from{transform:rotate(-22deg)}to{transform:rotate(22deg)}}
+@keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.012)}}
+@keyframes blink{0%,93%,100%{transform:scaleY(1)}96%{transform:scaleY(.1)}}
+@media (prefers-reduced-motion:reduce){.tail,.dogw,.eyes{animation:none!important}}
+</style>
+</head>
+<body style="background:transparent">
+<main>
+<div class="pat-hint"><span class="hand" aria-hidden="true">👋</span><span>Go ahead — give me a pat!</span></div>
+<div class="stage" id="stage">
+<svg id="dog" viewBox="0 0 400 420" role="img" aria-label="A cute Shiba Inu waiting to be petted">
+<ellipse cx="200" cy="398" rx="125" ry="13" fill="#000" opacity=".14"/>
+<g class="tail"><path d="M286 336Q352 334 342 274Q334 236 302 248" stroke="#D9822B" stroke-width="30" stroke-linecap="round" fill="none"/><path d="M346 292Q338 250 308 247" stroke="#FFF1DC" stroke-width="9" stroke-linecap="round" fill="none"/></g>
+<g class="dogw">
+<ellipse cx="200" cy="322" rx="108" ry="82" fill="#D9822B"/>
+<ellipse cx="200" cy="350" rx="62" ry="50" fill="#FFF1DC"/>
+<rect x="132" y="335" width="54" height="58" rx="27" fill="#D9822B"/><rect x="214" y="335" width="54" height="58" rx="27" fill="#D9822B"/>
+<ellipse cx="159" cy="391" rx="30" ry="15" fill="#FFF1DC"/><ellipse cx="241" cy="391" rx="30" ry="15" fill="#FFF1DC"/>
+<ellipse data-act="belly" cx="200" cy="350" rx="66" ry="42" fill="transparent" pointer-events="all"/>
+<g id="head">
+<g class="ear l"><path d="M104 170L112 80L174 124z" fill="#D9822B"/><path d="M117 152L121 100L154 126z" fill="#F4B6B0"/></g>
+<g class="ear r"><path d="M296 170L288 80L226 124z" fill="#D9822B"/><path d="M283 152L279 100L246 126z" fill="#F4B6B0"/></g>
+<ellipse cx="200" cy="188" rx="98" ry="82" fill="#D9822B"/>
+<path d="M104 200Q108 264 200 270Q292 264 296 200Q262 234 200 228Q138 234 104 200z" fill="#FFF1DC"/><circle cx="158" cy="138" r="7" fill="#FFF1DC"/><circle cx="242" cy="138" r="7" fill="#FFF1DC"/>
+<circle class="cheek" cx="140" cy="200" r="13" fill="#F4727F"/><circle class="cheek" cx="260" cy="200" r="13" fill="#F4727F"/>
+<ellipse cx="200" cy="220" rx="46" ry="36" fill="#FFF1DC"/>
+<path d="M200 214v12M184 228q16 14 32 0" stroke="#2B2118" stroke-width="4" fill="none" stroke-linecap="round"/>
+<path class="grin" d="M174 226Q200 272 226 226Q200 238 174 226z" fill="#8A3030"/>
+<path class="tongue" d="M191 236q9 22 18 0z" fill="#F4727F"/>
+<ellipse id="nose" cx="200" cy="204" rx="15" ry="11" fill="#2B2118"/><ellipse cx="195" cy="200" rx="4" ry="2.5" fill="#fff" opacity=".7"/>
+<g class="eyes"><circle cx="160" cy="165" r="11" fill="#2B2118"/><circle cx="240" cy="165" r="11" fill="#2B2118"/><circle cx="164" cy="161" r="3.5" fill="#fff"/><circle cx="244" cy="161" r="3.5" fill="#fff"/></g>
+<g class="spark" fill="#fff"><path d="M150 152l2 5 5 2-5 2-2 5-2-5-5-2 5-2z"/><path d="M230 152l2 5 5 2-5 2-2 5-2-5-5-2 5-2z"/></g>
+<g class="happy" fill="none" stroke="#2B2118" stroke-width="6" stroke-linecap="round"><path d="M146 170q14-20 28 0"/><path d="M226 170q14-20 28 0"/></g>
+<g class="heartEyes" fill="#F4727F"><path d="M160 180S141 168 141 156A9.5 9.5 0 0 1 160 153A9.5 9.5 0 0 1 179 156C179 168 160 180 160 180z"/><path d="M240 180S221 168 221 156A9.5 9.5 0 0 1 240 153A9.5 9.5 0 0 1 259 156C259 168 240 180 240 180z"/></g>
+<ellipse data-act="head" cx="200" cy="170" rx="104" ry="100" fill="transparent" pointer-events="all"/>
+<ellipse data-act="ear" cx="116" cy="185" rx="28" ry="56" transform="rotate(14 116 185)" fill="transparent" pointer-events="all"/>
+<ellipse data-act="ear" cx="284" cy="185" rx="28" ry="56" transform="rotate(-14 284 185)" fill="transparent" pointer-events="all"/>
+<ellipse data-act="chin" cx="200" cy="257" rx="50" ry="19" fill="transparent" pointer-events="all"/>
+<ellipse data-act="boop" cx="200" cy="205" rx="20" ry="15" fill="transparent" pointer-events="all"/>
+</g>
+</g>
+<g id="hand" opacity="0" pointer-events="none">
+    <!-- Wrist -->
+    <path
+        d="M-13 12 Q-15 30 -11 43 L11 43 Q15 28 13 12Z"
+        fill="#E8B58F"
+    />
+
+    <!-- Palm -->
+    <path
+        d="M-23 -18
+           Q-25 -31 -17 -39
+           Q-10 -45 0 -42
+           Q13 -42 22 -33
+           Q29 -25 24 -8
+           L19 13
+           Q15 25 0 25
+           Q-17 24 -21 10Z"
+        fill="#F1C9A5"
+        stroke="#D9A782"
+        stroke-width="1.2"
+    />
+
+    <!-- Fingers -->
+    <path d="M-19 -24 Q-23 -39 -20 -51 Q-18 -58 -13 -55 Q-8 -53 -10 -40 L-8 -24"
+        fill="#F1C9A5" stroke="#D9A782" stroke-width="1"/>
+
+    <path d="M-8 -31 Q-12 -49 -7 -59 Q-4 -65 1 -61 Q5 -58 2 -45 L3 -27"
+        fill="#F1C9A5" stroke="#D9A782" stroke-width="1"/>
+
+    <path d="M4 -31 Q2 -48 7 -57 Q11 -63 16 -58 Q19 -54 14 -39 L13 -24"
+        fill="#F1C9A5" stroke="#D9A782" stroke-width="1"/>
+
+    <!-- Thumb -->
+    <path d="M19 -17 Q33 -27 38 -17 Q42 -10 32 -3 L22 5"
+        fill="#F1C9A5" stroke="#D9A782" stroke-width="1"/>
+</g>
+</svg>
+</div>
+</main>
+<script>
+const $=id=>document.getElementById(id),svg=$('dog'),head=$('head'),hand=$('hand'),stage=$('stage'),nose=$('nose');
+const body=document.querySelector('.dogw'),earL=document.querySelector('.ear.l'),earR=document.querySelector('.ear.r');
+const HEART='<svg viewBox="0 0 24 22"><path d="M12 21S2 14 2 7.5A5.5 5.5 0 0 1 12 5a5.5 5.5 0 0 1 10 2.5C22 14 12 21 12 21z" fill="#F4727F"/></svg>';
+const SPOT={head:[200,150],ear:[116,180],chin:[200,257],belly:[200,350],boop:[200,205]};
+const calm=matchMedia('(prefers-reduced-motion: reduce)').matches;
+let n=0,L=0,joyT=0,stroke=false,cur='',lastT=0,lx=0,ly=0,lastTouch=0;const seen={};function applyLevel(){L=n>=24?3:n>=12?2:n>=5?1:0;['lv1','lv2','lv3'].forEach((c,i)=>svg.classList.toggle(c,L>i));}
+function toSvg(x,y){const p=svg.createSVGPoint();p.x=x;p.y=y;return p.matrixTransform(svg.getScreenCTM().inverse());}
+function toClient(x,y){const p=svg.createSVGPoint();p.x=x;p.y=y;return p.matrixTransform(svg.getScreenCTM());}
+function pop(el,cx,cy,dy,dur){const b=stage.getBoundingClientRect();el.style.left=(cx-b.left)+'px';el.style.top=(cy-b.top)+'px';stage.appendChild(el);
+if(calm){setTimeout(()=>el.remove(),700);return;}el.animate([{transform:'translateY(0) scale(.6)',opacity:0},{opacity:1,offset:.2},{transform:'translateY('+dy+'px) scale(1.1)',opacity:0}],{duration:dur,easing:'ease-out'}).onfinish=()=>el.remove();}
+function heart(cx,cy){const h=document.createElement('div');h.className='heart';h.innerHTML=HEART;pop(h,cx-11+Math.random()*40-20,cy-30,-90,1100);}
+function say(t,cx,cy){const b=document.createElement('div');b.className='bubble';b.textContent=t;pop(b,cx+10,cy-40,-40,800);}
+
+function handAnim(k, p) {
+    // Rotate the SVG hand around its own centre.
+    hand.style.transformBox = 'fill-box';
+    hand.style.transformOrigin = 'center';
+
+    const t = (dx, dy, opacity, offset, angle = 0) => ({
+        transform:
+            'translate(' + (p.x + dx) + 'px,' +
+            (p.y - 26 + dy) + 'px) rotate(' + angle + 'deg)',
+        opacity,
+        offset
+    });
+
+    let f, d = 500;
+
+    if (k === 'head') {
+        // Hand turned sideways, sweeping across the head.
+        f = [
+            t(-35, -10, 0, 0, -90),
+            t(-25, 0, 1, 0.15, -90),
+            t(-10, 0, 1, 0.3, -90),
+            t(10, 0, 1, 0.5, -90),
+            t(25, 0, 1, 0.7, -90),
+            t(35, -10, 0, 1, -90)
+        ];
+        d = 750;
+    }
+    else if (k === 'boop') {
+        f = [
+            t(0, -70, 0, 0),
+            t(0, -14, 1, 0.35),
+            t(0, -6, 1, 0.55),
+            t(0, -60, 0, 1)
+        ];
+        d = 340;
+    }
+    else if (k === 'belly') {
+        f = [
+            t(0, -60, 0, 0),
+            t(14, -8, 1, 0.15),
+            t(0, 2, 1, 0.35),
+            t(-14, -8, 1, 0.55),
+            t(0, -18, 1, 0.75),
+            t(0, -60, 0, 1)
+        ];
+        d = 800;
+    }
+    else {
+        f = [
+            t(0, -60, 0, 0),
+            t(-12, -8, 1, 0.2),
+            t(12, -8, 1, 0.4),
+            t(-12, -8, 1, 0.6),
+            t(12, -8, 1, 0.8),
+            t(0, -60, 0, 1)
+        ];
+        d = 650;
+    }
+
+    hand.animate(f, {
+        duration: d,
+        easing: 'ease-in-out',
+        fill: 'none'
+    });
+}
+function act(a,cx,cy){
+const p=toSvg(cx,cy),first=!seen[a];seen[a]=1;n+=first?3:1;
+const oL=L;lastTouch=performance.now();applyLevel();
+svg.style.setProperty('--wag',Math.max(.11,.26-n*.006)+'s');
+svg.classList.add('joy');clearTimeout(joyT);joyT=setTimeout(()=>svg.classList.remove('joy'),1500);
+if(!calm){handAnim(a,p);
+if(a==='head')head.animate([{transform:'scale(1,1)'},{transform:'scale(1.04,.9)'},{transform:'scale(.98,1.04)'},{transform:'scale(1,1)'}],{duration:380});
+else if(a==='ear'){const l=p.x<200;(l?earL:earR).animate([{transform:'rotate(0)'},{transform:'rotate('+(l?-18:18)+'deg)'},{transform:'rotate('+(l?8:-8)+'deg)'},{transform:'rotate(0)'}],{duration:320});
+head.animate([{transform:'rotate(0)'},{transform:'rotate('+(l?-3:3)+'deg)'},{transform:'rotate(0)'}],{duration:400});}
+else if(a==='chin')head.animate([{transform:'rotate(0) translateY(0)'},{transform:'rotate(-6deg) translateY(-6px)',offset:.3},{transform:'rotate(-6deg) translateY(-6px)',offset:.8},{transform:'rotate(0) translateY(0)'}],{duration:700});
+else if(a==='belly')body.animate([{transform:'rotate(0) scale(1)'},{transform:'rotate(-3deg) scale(1.03,.97)'},{transform:'rotate(3deg) scale(.98,1.03)'},{transform:'rotate(0) scale(1)'}],{duration:420});
+else{nose.animate([{transform:'scale(1)'},{transform:'scale(1.5)'},{transform:'scale(1)'}],{duration:260});head.animate([{transform:'translateY(0)'},{transform:'translateY(5px)'},{transform:'translateY(0)'}],{duration:260});}}
+if(a==='boop')say('Boop!',cx,cy);
+heart(cx,cy);if(a==='belly')heart(cx+20,cy);
+if(L>oL){const c=toClient(200,110);for(let i=0;i<5;i++)setTimeout(()=>heart(c.x,c.y),i*120);}}
+const A=e=>{const el=document.elementFromPoint(e.clientX,e.clientY);return el&&el.dataset?el.dataset.act:'';};
+svg.addEventListener('pointerdown',e=>{const a=A(e);if(!a)return;e.preventDefault();stroke=true;cur=a;lx=e.clientX;ly=e.clientY;lastT=performance.now();act(a,e.clientX,e.clientY);});
+svg.addEventListener('pointermove',e=>{if(!stroke)return;const a=A(e),t=performance.now();if(!a||a==='boop')return;
+if(t-lastT>160&&(a!==cur||t-lastT>260)&&Math.hypot(e.clientX-lx,e.clientY-ly)>24){cur=a;lastT=t;lx=e.clientX;ly=e.clientY;act(a,e.clientX,e.clientY);}});
+['pointerup','pointercancel'].forEach(k=>addEventListener(k,()=>{stroke=false;}));
+setInterval(()=>{if(n>0&&!stroke&&performance.now()-lastTouch>2500){n=Math.max(0,n-2);applyLevel();}},250);setInterval(()=>{if(L>=3&&!document.hidden&&!calm){const c=toClient(200,100);heart(c.x,c.y);}},1600);
+</script>
+</body>
+</html>
+'''
+
 
 # ============================================================
 # PATHS
@@ -2754,16 +3035,32 @@ if st.session_state.page == "get_dog_nl":
 
 main_navigation()
 
-st.markdown(
-    """
-    <div class="hero">
-        <h1 class="hero-title">
-            Find a dog you'll <span>love.</span>
-        </h1>
-    </div>
-    """,
-    unsafe_allow_html=True,
+# Homepage hero + interactive Shiba pet
+hero_text_col, shiba_col = st.columns(
+    [1.35, 1],
+    gap="large",
+    vertical_alignment="center",
 )
+
+with hero_text_col:
+    st.markdown(
+        """
+        <div class="hero">
+            <h1 class="hero-title">
+                Find a dog you'll <span>love.</span>
+            </h1>
+            <p class="hero-copy">Discover the companion who fits your lifestyle, your energy, and your heart.</p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+with shiba_col:
+    components.html(
+        PAT_THE_SHIBA_HTML,
+        height=590,
+        scrolling=False,
+    )
 
 # ============================================================
 # SEARCH / FILTERS
